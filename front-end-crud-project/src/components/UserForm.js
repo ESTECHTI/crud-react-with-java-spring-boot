@@ -1,27 +1,55 @@
 import React, { useState, useEffect } from 'react';
+import { createUser, updateUser } from '../services/api';
 
 function UserForm({ onSubmit, initialData }) {
-  const [formData, setFormData] = useState({ name: '', email: '' });
+  // Garante que initialData sempre seja um objeto
+  const safeInitialData = initialData || { name: '', email: '' };
+
+  const [formData, setFormData] = useState({
+    name: safeInitialData.name || '',
+    email: safeInitialData.email || ''
+  });
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    }
+    setFormData({
+      name: (initialData && initialData.name) || '',
+      email: (initialData && initialData.email) || ''
+    });
   }, [initialData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(initialData ? initialData.id : null, formData);
-    setFormData({ name: '', email: '' });
+    try {
+      let response;
+      if (initialData && initialData.id) {
+        // Atualizando um usuário existente
+        response = await updateUser(initialData.id, formData);
+      } else {
+        // Criando um novo usuário
+        response = await createUser(formData);
+      }
+
+      console.log('User created/updated:', response);
+
+      // Chame onSubmit com os dados retornados pela API
+      onSubmit(response.id, response);
+
+      // Limpar o formulário
+      setFormData({ name: '', email: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Adicionar lógica para exibir mensagem de erro
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="max-w-md mx-auto p-4 border border-gray-300 rounded" onSubmit={handleSubmit}>
       <input
+        className="w-full p-2 mb-2 border border-gray-300 rounded"
         type="text"
         name="name"
         value={formData.name}
@@ -30,6 +58,7 @@ function UserForm({ onSubmit, initialData }) {
         required
       />
       <input
+        className="w-full p-2 mb-2 border border-gray-300 rounded"
         type="email"
         name="email"
         value={formData.email}
@@ -37,7 +66,9 @@ function UserForm({ onSubmit, initialData }) {
         placeholder="Email"
         required
       />
-      <button type="submit">{initialData ? 'Update' : 'Create'} User</button>
+      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" type="submit">
+        {initialData && initialData.id ? 'Update' : 'Create'} User
+      </button>
     </form>
   );
 }

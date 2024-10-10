@@ -33,18 +33,23 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>CRUD App</h1>
+    <div className="container mx-auto p-4">
+    <h1 className="text-3xl font-bold text-center mb-8">CRUD App</h1>
+    <div className="bg-white shadow-md rounded-lg p-6">
       <UserForm
         onSubmit={editingUser ? handleUpdateUser : handleCreateUser}
         initialData={editingUser}
       />
+    </div>
+    <div className="mt-8">
       <UserList
         users={users}
         onEdit={setEditingUser}
         onDelete={handleDeleteUser}
+        className="border border-gray-300 rounded-lg shadow-sm"
       />
     </div>
+  </div>
   );
 }
 

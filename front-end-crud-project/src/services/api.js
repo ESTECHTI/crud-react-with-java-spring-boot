@@ -11,6 +11,7 @@ export const createUser = async (userData) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(userData),
   });
+  console.log('teste ' + JSON.stringify(response) )
   return response.json();
 };
 
